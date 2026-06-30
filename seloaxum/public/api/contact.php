@@ -21,7 +21,7 @@ $formData = [
     'your-message' => $data['message'] ?? '',
 ];
 
-$ch = curl_init('https://admin.seloaxumtradingplc.com/wp/wp-json/contact-form-7/v1/contact-forms/22/feedback');
+$ch = curl_init('https://your_domail_name/wp/wp-json/contact-form-7/v1/contact-forms/<replace with the form id>/feedback');
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($formData));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
