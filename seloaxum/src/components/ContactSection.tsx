@@ -12,7 +12,7 @@ import CompanyProfilePDF from "./CompanyProfilePDF";
 
 const LOGO_URL = `${window.location.origin}/seloaxum-logo.png`;
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+const API_URL = "https://admin.seloaxumtradingplc.com/wp/wp-json/contact-form-7/v1/contact-forms/22/feedback";
 
 const DOWNLOAD_LABEL: Record<string, string> = {
   en: "Download Company Profile",
@@ -49,24 +49,25 @@ export default function ContactSection() {
     setIsSubmitting(true);
 
     const form = e.target as HTMLFormElement;
-    const body = {
-      name: (form.elements.namedItem("name") as HTMLInputElement).value,
-      company: (form.elements.namedItem("company") as HTMLInputElement).value,
-      email: (form.elements.namedItem("email") as HTMLInputElement).value,
-      country: (form.elements.namedItem("country") as HTMLInputElement).value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
-    };
+    const formData = new FormData();
+    formData.append("_wpcf7_unit_tag", "wpcf7-f22-p1-o1");
+    formData.append("your-name", (form.elements.namedItem("name") as HTMLInputElement).value);
+    formData.append("company-name", (form.elements.namedItem("company") as HTMLInputElement).value);
+    formData.append("your-email", (form.elements.namedItem("email") as HTMLInputElement).value);
+    formData.append("country", (form.elements.namedItem("country") as HTMLInputElement).value);
+    formData.append("your-subject", `B2B Inquiry from ${(form.elements.namedItem("company") as HTMLInputElement).value}`);
+    formData.append("your-message", (form.elements.namedItem("message") as HTMLTextAreaElement).value);
 
     try {
-      const res = await fetch(`${API_BASE}/api/contact`, {
+      const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: formData,
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: string }).error ?? "Server error");
+      const data = await res.json();
+
+      if (data.status !== "mail_sent") {
+        throw new Error(data.message || "Submission failed");
       }
 
       toast({ title: ct.toastTitle, description: ct.toastDesc });
